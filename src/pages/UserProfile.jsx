@@ -58,6 +58,19 @@ const iconComponents = {
   gift: CardGiftcardIcon
 };
 
+const getBorderColor = (investorType) => {
+  switch(investorType) {
+    case 'Explorador':
+      return '#4CAF50'; // Verde
+    case 'Aventurero':
+      return '#FFC107'; // Amarillo
+    case 'Héroe':
+      return '#F44336'; // Rojo
+    default:
+      return 'divider';
+  }
+};
+
 const getUserInitials = (user) => {
   const first = user.personalInfo?.firstName || '';
   const last = user.personalInfo?.lastName || '';
@@ -66,6 +79,7 @@ const getUserInitials = (user) => {
 
 const ProfessionalProfileView = ({ user, onEditToggle }) => {
   const theme = useTheme();
+  const borderColor = getBorderColor(user.investorType);
   
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -85,18 +99,97 @@ const ProfessionalProfileView = ({ user, onEditToggle }) => {
     return new Date(dateString).toLocaleDateString('es-ES', options);
   };
 
+  const Section = ({ title, children }) => (
+    <Box sx={{ mb: 3 }}>
+      <Typography 
+        variant="h6" 
+        component="h2" 
+        fontWeight="600" 
+        gutterBottom
+        sx={{ 
+          color: 'text.primary',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}
+      >
+        {title}
+      </Typography>
+      <Box sx={{ pl: 1 }}>
+        {children}
+      </Box>
+    </Box>
+  );
+
+  const InfoItem = ({ icon, label, value, chip, fullWidth }) => (
+    <Box 
+      sx={{ 
+        mb: 1.5,
+        display: 'flex',
+        flexDirection: fullWidth ? 'column' : 'row',
+        alignItems: fullWidth ? 'flex-start' : 'center',
+        gap: 1
+      }}
+    >
+      <Box sx={{ color: 'primary.main', minWidth: 24 }}>{icon}</Box>
+      
+      <Box sx={{ flexGrow: 1 }}>
+        <Typography 
+          variant="body2" 
+          color="text.secondary" 
+          sx={{ mb: 0.5 }}
+        >
+          {label}
+        </Typography>
+        
+        {value ? (
+          chip ? (
+            <Chip 
+              label={value} 
+              sx={{ 
+                fontWeight: 500,
+                borderRadius: 1,
+                backgroundColor: `${borderColor}20`,
+                color: borderColor,
+                borderColor: borderColor
+              }}
+            />
+          ) : (
+            <Typography 
+              variant="body1" 
+              fontWeight="500"
+              sx={{ wordBreak: 'break-word' }}
+            >
+              {value}
+            </Typography>
+          )
+        ) : (
+          <Typography 
+            variant="body1" 
+            color="text.disabled" 
+            fontStyle="italic"
+          >
+            No especificado
+          </Typography>
+        )}
+      </Box>
+    </Box>
+  );
+
   return (
     <Paper 
       elevation={0}
       sx={{
-        p: 4,
+        p: 3,
         borderRadius: 3,
-        border: '1px solid',
-        borderColor: 'divider',
+        border: '2px solid',
+        borderColor: borderColor,
         backgroundColor: 'background.paper',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
-        width: '100%',
-        position: 'relative'
+        maxWidth: '800px',
+        margin: '0 auto',
+        position: 'relative',
+        width: '100%'
       }}
     >
       <button 
@@ -113,7 +206,7 @@ const ProfessionalProfileView = ({ user, onEditToggle }) => {
         sx={{ 
           display: 'flex', 
           alignItems: 'center', 
-          mb: 4,
+          mb: 3,
           pb: 2,
           borderBottom: '1px solid',
           borderColor: 'divider'
@@ -122,17 +215,17 @@ const ProfessionalProfileView = ({ user, onEditToggle }) => {
         <Avatar 
           src={user.photoUrl}
           sx={{ 
-            width: 80, 
-            height: 80, 
-            mr: 3,
+            width: 72, 
+            height: 72, 
+            mr: 2,
             border: '2px solid',
-            borderColor: theme.palette.primary.main
+            borderColor: borderColor
           }}
         />
         
         <Box>
           <Typography 
-            variant="h4" 
+            variant="h5" 
             component="h1" 
             fontWeight="bold" 
             gutterBottom
@@ -140,26 +233,27 @@ const ProfessionalProfileView = ({ user, onEditToggle }) => {
               color: 'text.primary',
               display: 'flex',
               alignItems: 'center',
-              gap: 2
+              gap: 1.5
             }}
           >
             {user.personalInfo?.firstName} {user.personalInfo?.lastName}
             <Chip 
               label={user.investorType} 
-              color="primary" 
-              variant="outlined"
               sx={{ 
-                fontSize: '0.8rem',
+                backgroundColor: `${borderColor}20`,
+                color: borderColor,
+                borderColor: borderColor,
+                fontSize: '0.75rem',
                 fontWeight: 600,
-                px: 1.5,
-                py: 0.5,
+                px: 1,
+                py: 0.25,
                 borderRadius: 1
               }} 
             />
           </Typography>
           
           <Typography 
-            variant="body1" 
+            variant="body2" 
             color="text.secondary"
             sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
           >
@@ -169,8 +263,12 @@ const ProfessionalProfileView = ({ user, onEditToggle }) => {
         </Box>
       </Box>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+        gap: 3
+      }}>
+        <Box>
           <Section title="Datos Personales">
             <InfoItem 
               icon={<FingerprintIcon />}
@@ -193,9 +291,9 @@ const ProfessionalProfileView = ({ user, onEditToggle }) => {
               value={user.personalInfo?.email}
             />
           </Section>
-        </Grid>
+        </Box>
         
-        <Grid item xs={12} md={6}>
+        <Box>
           <Section title="Dirección">
             <InfoItem 
               icon={<LocationCityIcon />}
@@ -218,150 +316,7 @@ const ProfessionalProfileView = ({ user, onEditToggle }) => {
               chip
             />
           </Section>
-        </Grid>
-      </Grid>
-    </Paper>
-  );
-};
-
-const Section = ({ title, children }) => (
-  <Box sx={{ mb: 3 }}>
-    <Typography 
-      variant="h6" 
-      component="h2" 
-      fontWeight="600" 
-      gutterBottom
-      sx={{ 
-        color: 'text.primary',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1
-      }}
-    >
-      {title}
-    </Typography>
-    <Box sx={{ pl: 1 }}>
-      {children}
-    </Box>
-  </Box>
-);
-
-const InfoItem = ({ icon, label, value, chip, fullWidth }) => (
-  <Box 
-    sx={{ 
-      mb: 2,
-      display: 'flex',
-      flexDirection: fullWidth ? 'column' : 'row',
-      alignItems: fullWidth ? 'flex-start' : 'center',
-      gap: 1.5
-    }}
-  >
-    <Box sx={{ color: 'primary.main', minWidth: 24 }}>{icon}</Box>
-    
-    <Box sx={{ flexGrow: 1 }}>
-      <Typography 
-        variant="body2" 
-        color="text.secondary" 
-        sx={{ mb: 0.5 }}
-      >
-        {label}
-      </Typography>
-      
-      {value ? (
-        chip ? (
-          <Chip 
-            label={value} 
-            color="primary" 
-            variant="outlined"
-            size="small"
-            sx={{ 
-              fontWeight: 500,
-              borderRadius: 1,
-              backgroundColor: 'primary.light',
-              color: 'primary.dark',
-              borderColor: 'primary.light'
-            }}
-          />
-        ) : (
-          <Typography 
-            variant="body1" 
-            fontWeight="500"
-            sx={{ wordBreak: 'break-word' }}
-          >
-            {value}
-          </Typography>
-        )
-      ) : (
-        <Typography 
-          variant="body1" 
-          color="text.disabled" 
-          fontStyle="italic"
-        >
-          No especificado
-        </Typography>
-      )}
-    </Box>
-  </Box>
-);
-
-const RankingSectionCard = ({ title, children, action }) => {
-  return (
-    <Paper 
-      elevation={0}
-      sx={{
-        borderRadius: 3,
-        overflow: 'hidden',
-        border: '1px solid',
-        borderColor: 'divider',
-        backgroundColor: 'background.paper'
-      }}
-    >
-      <Box 
-        sx={{
-          p: 2,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}
-      >
-        <Typography variant="h6" fontWeight="bold">
-          {title}
-        </Typography>
-        {action}
-      </Box>
-      
-      <Divider />
-      
-      <Box sx={{ p: 2 }}>
-        {children}
-      </Box>
-      
-      <Box 
-        sx={{
-          backgroundColor: 'grey.50',
-          p: 2,
-          borderTop: '1px solid',
-          borderColor: 'divider'
-        }}
-      >
-        <Typography variant="subtitle2" fontWeight="bold" mb={1}>
-          Proyectos destacados
-        </Typography>
-        
-        <Grid container spacing={1}>
-          {['Indie Universe', 'Patito Feo', 'Nido de Agua', 'Aldea'].map((project, index) => (
-            <Grid item key={index}>
-              <Chip
-                icon={<ProjectIcon fontSize="small" />}
-                label={project}
-                sx={{
-                  backgroundColor: 'primary.lighter',
-                  color: 'primary.dark'
-                }}
-              />
-            </Grid>
-          ))}
-        </Grid>
+        </Box>
       </Box>
     </Paper>
   );
@@ -486,6 +441,7 @@ const UserProfile = () => {
       content: (
         <SectionCard 
           title={`Mis Insignias (${user.achievements?.completed || 0}/${user.achievements?.total || badges.length})`}
+          investorType={user.investorType}
           action={
             <button 
               onClick={simulateAchievementProgress}
@@ -495,7 +451,7 @@ const UserProfile = () => {
             </button>
           }
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {userBadges.map((badge) => (
               <BadgeComponent key={badge.id} {...badge} />
             ))}
@@ -508,7 +464,10 @@ const UserProfile = () => {
       label: 'Mi Cerdito',
       icon: <CardGiftcardIcon fontSize="small" />,
       content: (
-        <SectionCard title="Mi Cerdito">
+        <SectionCard 
+          title="Mi Cerdito"
+          investorType={user.investorType}
+        >
           <PiggyBank />
         </SectionCard>
       )
@@ -518,7 +477,10 @@ const UserProfile = () => {
       label: 'Ranking Mensual',
       icon: <TrendIcon fontSize="small" />,
       content: (
-        <RankingSectionCard title="Top Inversionistas">
+        <SectionCard 
+          title="Top Inversionistas"
+          investorType={user.investorType}
+        >
           <Box>
             {rankings.map((user, index) => (
               <RankingItem 
@@ -529,7 +491,7 @@ const UserProfile = () => {
               />
             ))}
           </Box>
-        </RankingSectionCard>
+        </SectionCard>
       )
     },
     {
@@ -537,7 +499,10 @@ const UserProfile = () => {
       label: 'Validación de Identidad',
       icon: <FingerprintIcon fontSize="small" />,
       content: (
-        <SectionCard title="Verificación de Identidad">
+        <SectionCard 
+          title="Verificación de Identidad"
+          investorType={user.investorType}
+        >
           <div className="space-y-4">
             <p className="text-gray-600">
               Completa tu verificación de identidad para acceder a todas las funciones.
@@ -554,7 +519,10 @@ const UserProfile = () => {
       label: 'Método de Pago',
       icon: <AttachMoneyIcon fontSize="small" />,
       content: (
-        <SectionCard title="Métodos de Pago">
+        <SectionCard 
+          title="Métodos de Pago"
+          investorType={user.investorType}
+        >
           <div className="space-y-4">
             <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
               <h3 className="font-medium text-gray-800">Tarjeta de crédito/débito</h3>
@@ -572,14 +540,17 @@ const UserProfile = () => {
       label: 'Cuentas Bancarias',
       icon: <AccountBalanceIcon fontSize="small" />,
       content: (
-        <SectionCard title="Cuentas Bancarias">
+        <SectionCard 
+          title="Cuentas Bancarias"
+          investorType={user.investorType}
+        >
           <p className="text-gray-600">
             Esta sección estará disponible próximamente. Mantente atento a nuevas funcionalidades.
           </p>
         </SectionCard>
       )
     }
-  ], [userBadges, user.achievements]);
+  ], [userBadges, user.achievements, user.investorType]);
 
   const activeTabContent = tabs.find(tab => tab.id === activeTab)?.content;
 
@@ -622,13 +593,11 @@ const UserProfile = () => {
 
       <TopBar companyName="LOKL" userInitials={getUserInitials(user)} />
 
-      <div className="py-8 px-4 sm:px-6 lg:px-8">
+      <div className="py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Contenedor principal con bordes visibles */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-blue-200 overflow-hidden">
-            {/* Sección superior con gradiente */}
-            <div className="p-6 md:p-8 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="flex flex-col md:flex-row gap-8">
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="p-4 md:p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex flex-col md:flex-row gap-6">
                 <UserProfileCard 
                   user={user} 
                   profileCompletion={user.profileCompletion} 
@@ -645,7 +614,7 @@ const UserProfile = () => {
                     onEditToggle={() => setEditMode(!editMode)}
                   >
                     {editMode && (
-                      <div className="mt-6">
+                      <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Tipo de Inversor
                         </label>
@@ -670,8 +639,7 @@ const UserProfile = () => {
               </div>
             </div>
 
-            {/* Barra de navegación */}
-            <div className="bg-black px-6 py-3 border-b border-gray-700">
+            <div className="bg-black px-4 py-2 border-b border-gray-700">
               <TabNavigation 
                 tabs={tabs.map(tab => ({ 
                   id: tab.id, 
@@ -684,13 +652,12 @@ const UserProfile = () => {
                 activeTextColor="text-white"
                 activeTabClass="bg-gray-800"
                 hoverClass="hover:text-white hover:bg-gray-700"
-                tabPadding="px-4 py-2"
+                tabPadding="px-3 py-1"
                 fullWidth
               />
             </div>
 
-            {/* Contenido de la pestaña activa */}
-            <div className="bg-white p-6 rounded-b-xl">
+            <div className="bg-white p-4 rounded-b-xl">
               {activeTabContent}
             </div>
           </div>

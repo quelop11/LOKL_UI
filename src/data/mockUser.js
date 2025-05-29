@@ -11,7 +11,7 @@ export const mockUser = {
     address: 'Av. Nutibara #71-25'
   },
   joinDate: '2020-03-15',
-  investorType: 'Aventurero', // Héroe , Explorador , Aventurero
+  investorType: 'Héroe', // Héroe , Explorador , Aventurero
   profileCompletion: 65,
   photoUrl: "https://randomuser.me/api/portraits/men/42.jpg",
   badges: {
