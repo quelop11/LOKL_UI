@@ -1,0 +1,27 @@
+/* Efecto de brillo para el avatar */
+.avatar-glow {
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-glow.Explorador {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+.avatar-glow.Aventurero {
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.avatar-glow.Héroe {
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+}
+
+/* Animación de pulso para el badge */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.badge-pulse {
+  animation: pulse 2s infinite;
+}

@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes piggy-jump {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-8px) scale(1.05); }
+  50% { transform: translateY(0) scale(1.08); }
+  75% { transform: translateY(-4px) scale(1.05); }
+}
+
+.animate-piggy-jump {
+  animation: piggy-jump 0.6s ease-in-out;
+  transform-origin: center bottom;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+/* Transiciones suaves para hover */
+button, .interactive {
+  transition: all 0.2s ease;
+}
