@@ -30,7 +30,7 @@ import {
   NewReleases as NewReleasesIcon,
   MilitaryTech as MilitaryTechIcon,
   WorkspacePremium as WorkspacePremiumIcon,
-  CardGiftcard as CardGiftcardIcon,
+  Savings as SavingsIcon,
   AccountBalance as AccountBalanceIcon
 } from '@mui/icons-material';
 import { mockUser } from '../data/mockUser';
@@ -43,8 +43,9 @@ import PersonalInfoForm from '../components/PersonalInfoForm';
 import SectionCard from '../components/SectionCard';
 import TabNavigation from '../components/TabNavigation';
 import PiggyBank from '../components/PiggyBank';
-import BadgeComponent from '../components/Badge';
+import Badge from '../components/Badge';
 import RankingItem from '../components/RankingItem';
+import PaymentMethod from '../components/PaymentMethod';
 
 const iconComponents = {
   money: AttachMoneyIcon,
@@ -55,19 +56,16 @@ const iconComponents = {
   new: NewReleasesIcon,
   military: MilitaryTechIcon,
   premium: WorkspacePremiumIcon,
-  gift: CardGiftcardIcon
+  gift: SavingsIcon,
+  account: AccountBalanceIcon
 };
 
 const getBorderColor = (investorType) => {
   switch(investorType) {
-    case 'Explorador':
-      return '#4CAF50'; // Verde
-    case 'Aventurero':
-      return '#FFC107'; // Amarillo
-    case 'Héroe':
-      return '#F44336'; // Rojo
-    default:
-      return 'divider';
+    case 'Explorador': return '#4CAF50';
+    case 'Aventurero': return '#FFC107';
+    case 'Héroe': return '#F44336';
+    default: return 'divider';
   }
 };
 
@@ -453,7 +451,7 @@ const UserProfile = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {userBadges.map((badge) => (
-              <BadgeComponent key={badge.id} {...badge} />
+              <Badge key={badge.id} {...badge} />
             ))}
           </div>
         </SectionCard>
@@ -462,13 +460,13 @@ const UserProfile = () => {
     {
       id: 'piggy',
       label: 'Mi Cerdito',
-      icon: <CardGiftcardIcon fontSize="small" />,
+      icon: <SavingsIcon fontSize="small" />,
       content: (
         <SectionCard 
           title="Mi Cerdito"
           investorType={user.investorType}
         >
-          <PiggyBank />
+          <PiggyBank investorType={user.investorType} />
         </SectionCard>
       )
     },
@@ -523,15 +521,7 @@ const UserProfile = () => {
           title="Métodos de Pago"
           investorType={user.investorType}
         >
-          <div className="space-y-4">
-            <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-              <h3 className="font-medium text-gray-800">Tarjeta de crédito/débito</h3>
-              <p className="text-sm text-gray-500">Añade tu tarjeta para realizar inversiones</p>
-              <button className="mt-2 px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
-                + Añadir tarjeta
-              </button>
-            </div>
-          </div>
+          <PaymentMethod investorType={user.investorType} />
         </SectionCard>
       )
     },

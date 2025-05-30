@@ -7,7 +7,41 @@ import CelebrationIcon from '@mui/icons-material/Celebration';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
-const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 1000000 }) => {
+const getPiggyColors = (investorType) => {
+  switch(investorType) {
+    case 'Explorador':
+      return {
+        primary: '#4CAF50',
+        light: '#E8F5E9',
+        dark: '#388E3C',
+        confetti: '#81C784'
+      };
+    case 'Aventurero':
+      return {
+        primary: '#FFC107',
+        light: '#FFF8E1',
+        dark: '#FFA000',
+        confetti: '#FFD54F'
+      };
+    case 'Héroe':
+      return {
+        primary: '#F44336',
+        light: '#FFEBEE',
+        dark: '#D32F2F',
+        confetti: '#E57373'
+      };
+    default:
+      return {
+        primary: '#2563EB',
+        light: '#EFF6FF',
+        dark: '#1D4ED8',
+        confetti: '#93C5FD'
+      };
+  }
+};
+
+const PiggyBank = ({ initialDays = 30, initialDaily = 100000, initialGoal = 1062500, investorType = 'Aventurero' }) => {
+  const colors = getPiggyColors(investorType);
   const [days, setDays] = useState(initialDays);
   const [dailyAmount, setDailyAmount] = useState(initialDaily);
   const [goal, setGoal] = useState(initialGoal);
@@ -77,8 +111,9 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
           {[...Array(50)].map((_, i) => (
             <div 
               key={i}
-              className="absolute w-2.5 h-2.5 bg-blue-400 rounded-full"
+              className="absolute w-2.5 h-2.5 rounded-full"
               style={{
+                backgroundColor: colors.confetti,
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
                 transform: `scale(${Math.random() * 0.5 + 0.5})`,
@@ -89,7 +124,7 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
           <CelebrationIcon 
             style={{
               fontSize: '3.5rem',
-              color: '#2563EB',
+              color: colors.primary,
               animation: 'bounce 1s infinite'
             }} 
           />
@@ -100,13 +135,13 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
         <div className="w-full md:w-1/3 flex flex-col items-center">
           <div className="relative w-40 h-40 mb-6">
             <svg className="w-full h-full" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="#EFF6FF" strokeWidth="8" />
+              <circle cx="50" cy="50" r="45" fill="none" stroke={colors.light} strokeWidth="8" />
               <circle
                 cx="50"
                 cy="50"
                 r="45"
                 fill="none"
-                stroke="#2563EB"
+                stroke={colors.primary}
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={`${progress * 2.83}, 283`}
@@ -115,13 +150,15 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
             </svg>
             <div className={`absolute inset-0 flex items-center justify-center ${isAnimating ? 'animate-piggy-jump' : ''}`}>
               {isAnimating ? (
-                <SavingsIcon style={{ fontSize: '4.5rem', color: '#1D4ED8' }} />
+                <SavingsIcon style={{ fontSize: '4.5rem', color: colors.dark }} />
               ) : (
-                <PaidIcon style={{ fontSize: '4.5rem', color: '#2563EB' }} />
+                <PaidIcon style={{ fontSize: '4.5rem', color: colors.primary }} />
               )}
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold text-blue-700 mt-20">{progress.toFixed(1)}%</span>
+              <span className="text-2xl font-bold mt-20" style={{ color: colors.primary }}>
+                {progress.toFixed(1)}%
+              </span>
             </div>
           </div>
 
@@ -130,9 +167,15 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
             disabled={progress >= 100 || lastDepositDate === today}
             className={`w-full py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${
               progress >= 100 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 
-              lastDepositDate === today ? 'bg-blue-100 text-blue-700' : 
-              'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
+              lastDepositDate === today ? `bg-${colors.light} text-${colors.dark}` : 
+              `bg-${colors.primary} text-white hover:bg-${colors.dark} shadow-md`
             }`}
+            style={{
+              backgroundColor: progress >= 100 ? '#E5E7EB' : 
+                lastDepositDate === today ? colors.light : colors.primary,
+              color: progress >= 100 ? '#6B7280' : 
+                lastDepositDate === today ? colors.dark : 'white'
+            }}
           >
             {progress >= 100 ? (
               <>
@@ -153,11 +196,15 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
         <div className="w-full md:w-2/3">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-              <TrendingUpIcon style={{ color: '#2563EB', fontSize: '1.8rem' }} />
+              <TrendingUpIcon style={{ color: colors.primary, fontSize: '1.8rem' }} />
               Mi Plan de Ahorro
             </h2>
             {progress >= 100 && (
-              <button onClick={resetSavings} className="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
+              <button 
+                onClick={resetSavings} 
+                className="text-sm px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors"
+                style={{ backgroundColor: colors.light, color: colors.dark }}
+              >
                 <RefreshIcon style={{ fontSize: '1.2rem' }} /> Reiniciar
               </button>
             )}
@@ -165,7 +212,7 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
 
           <p className="text-gray-600 mb-6 text-lg leading-relaxed">
             LOKL te da tu cerdito diario: no tienes el millón para invertir, te lo damos diario.
-             <span className="font-medium text-blue-600">¡Ahorra con tu cerdito y crece tu inversión!</span>
+             <span className="font-medium" style={{ color: colors.primary }}>¡Ahorra con tu cerdito y crece tu inversión!</span>
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -181,6 +228,7 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
               onSave={() => saveEdit('days')}
               min={1}
               max={365}
+              colors={colors}
             />
 
             {/* Daily amount */}
@@ -194,10 +242,16 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
               onChange={(e) => handleInputChange('daily', e.target.value)}
               onSave={() => saveEdit('daily')}
               prefix="$"
+              colors={colors}
             />
 
             {/* Total saved */}
-            <SimpleCard label="Total ahorrado" value={`$${saved.toLocaleString()}`} />
+            <SimpleCard 
+              label="Total ahorrado" 
+              value={`$${saved.toLocaleString()}`} 
+              colors={colors} 
+            />
+            
             {/* Goal */}
             <SettingCard
               label="Meta de ahorro"
@@ -209,19 +263,20 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
               onChange={(e) => handleInputChange('goal', e.target.value)}
               onSave={() => saveEdit('goal')}
               prefix="$"
+              colors={colors}
             />
           </div>
 
           {daysLeft > 0 && progress < 100 && (
-            <div className="bg-blue-100 border border-blue-200 p-4 rounded-xl mb-4">
-              <p className="text-blue-800">
+            <div className="p-4 rounded-xl mb-4" style={{ backgroundColor: colors.light, border: `1px solid ${colors.primary}20` }}>
+              <p style={{ color: colors.dark }}>
                 <span className="font-semibold">Proyección:</span> Al ritmo actual, alcanzarás tu meta en <span className="font-bold">{daysLeft} días</span>.
               </p>
             </div>
           )}
 
-          <div className="bg-white border border-blue-100 p-4 rounded-xl shadow-sm">
-            <p className="text-blue-700 italic text-center text-lg">"{motivationalPhrase}"</p>
+          <div className="p-4 rounded-xl shadow-sm" style={{ backgroundColor: colors.light, border: `1px solid ${colors.primary}20` }}>
+            <p className="italic text-center text-lg" style={{ color: colors.primary }}>"{motivationalPhrase}"</p>
           </div>
         </div>
       </div>
@@ -229,8 +284,8 @@ const PiggyBank = ({ initialDays = 30, initialDaily = 33333, initialGoal = 10000
   );
 };
 
-const SettingCard = ({ label, value, icon, isEditing, tempValue, onEdit, onChange, onSave, min, max, prefix }) => (
-  <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+const SettingCard = ({ label, value, icon, isEditing, tempValue, onEdit, onChange, onSave, min, max, prefix, colors }) => (
+  <div className="p-4 rounded-xl border" style={{ backgroundColor: colors.light, borderColor: colors.primary + '20' }}>
     <div className="flex justify-between items-center mb-2">
       <p className="text-sm font-medium text-gray-600">{label}</p>
       {isEditing ? (
@@ -244,12 +299,20 @@ const SettingCard = ({ label, value, icon, isEditing, tempValue, onEdit, onChang
             max={max}
             className="w-20 mr-2 p-1.5 border rounded-md text-center"
           />
-          <button onClick={onSave} className="text-xs bg-blue-600 text-white px-2 py-1.5 rounded-md hover:bg-blue-700">
+          <button 
+            onClick={onSave} 
+            className="text-xs text-white px-2 py-1.5 rounded-md hover:opacity-90"
+            style={{ backgroundColor: colors.primary }}
+          >
             <CheckIcon style={{ fontSize: '1rem' }} />
           </button>
         </div>
       ) : (
-        <button onClick={onEdit} className="text-blue-600 hover:text-blue-800 flex items-center gap-1">
+        <button 
+          onClick={onEdit} 
+          className="hover:opacity-80 flex items-center gap-1"
+          style={{ color: colors.primary }}
+        >
           <span className="font-semibold text-lg">{value}</span>
           {icon}
         </button>
@@ -258,10 +321,10 @@ const SettingCard = ({ label, value, icon, isEditing, tempValue, onEdit, onChang
   </div>
 );
 
-const SimpleCard = ({ label, value }) => (
-  <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+const SimpleCard = ({ label, value, colors }) => (
+  <div className="p-4 rounded-xl border" style={{ backgroundColor: colors.light, borderColor: colors.primary + '20' }}>
     <p className="text-sm font-medium text-gray-600 mb-1">{label}</p>
-    <p className="font-bold text-2xl text-blue-700">{value}</p>
+    <p className="font-bold text-2xl" style={{ color: colors.primary }}>{value}</p>
   </div>
 );
 
