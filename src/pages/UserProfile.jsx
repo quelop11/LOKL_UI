@@ -57,7 +57,7 @@ const UserProfile = () => {
       unlocked: [],
       progress: {}
     },
-    photoUrl: null
+    photoUrl: avatar1
   });
 
   const [editMode, setEditMode] = useState(false);
@@ -71,7 +71,7 @@ const UserProfile = () => {
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-  const [tempPhoto, setTempPhoto] = useState(null);
+  const [tempPhoto, setTempPhoto] = useState(avatar1);
   
   const fileInputRef = useRef(null);
 
@@ -178,7 +178,7 @@ const UserProfile = () => {
     }));
     
     setEditMode(false);
-    setTempPhoto(null);
+    setTempPhoto(avatar1);
     showSuccess('Perfil actualizado correctamente!');
   };
 
@@ -326,18 +326,16 @@ const UserProfile = () => {
       {/* Navbar */}
       <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm">
         <div className="flex items-center">
-          {/* Logo LOKL - alineado verticalmente */}
           <div className="flex items-center h-full">
             <img 
               src={logo} 
               alt="LOKL Logo" 
-              className="h-10 object-contain" // Altura fija para mantener verticalidad
+              className="h-10 object-contain"
             />
           </div>
         </div>
         
         <div className="flex items-center gap-4">
-          {/* Icono de notificaciones - alineado verticalmente */}
           <button className="relative p-2 rounded-full hover:bg-gray-100 flex items-center">
             <Bell className="h-5 w-5" />
             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#3533FF] text-xs text-white">
@@ -345,7 +343,6 @@ const UserProfile = () => {
             </span>
           </button>
           
-          {/* Foto de perfil - alineada verticalmente */}
           <div className="h-8 w-8 rounded-full border-2 border-[#3533FF] overflow-hidden flex items-center justify-center">
             {user.photoUrl ? (
               <img src={user.photoUrl} alt="User" className="w-full h-full object-cover" />
@@ -435,9 +432,9 @@ const UserProfile = () => {
                 <div className="h-16 w-16 rounded-full border-2 border-[#3533FF] overflow-hidden relative">
                   {editMode ? (
                     <div className="cursor-pointer relative w-full h-full">
-                      {tempPhoto || user.photoUrl ? (
+                      {tempPhoto ? (
                         <img 
-                          src={tempPhoto || user.photoUrl} 
+                          src={tempPhoto} 
                           alt="User" 
                           className="w-full h-full object-cover"
                         />
@@ -471,7 +468,7 @@ const UserProfile = () => {
               <button 
                 onClick={() => {
                   if (editMode) {
-                    setTempPhoto(null);
+                    setTempPhoto(avatar1);
                   }
                   setEditMode(!editMode);
                 }}
@@ -483,12 +480,12 @@ const UserProfile = () => {
             <div className="p-4">
               {editMode ? (
                 <div className="space-y-4">
-                  {/* Sección de foto de perfil mejorada */}
+                  {/* Sección de foto de perfil */}
                   <div className="flex items-center gap-6 mb-4">
                     <div className="h-24 w-24 rounded-full border-2 border-[#3533FF] overflow-hidden relative">
-                      {tempPhoto || user.photoUrl ? (
+                      {tempPhoto ? (
                         <img 
-                          src={tempPhoto || user.photoUrl} 
+                          src={tempPhoto} 
                           alt="User" 
                           className="w-full h-full object-cover"
                         />
@@ -589,26 +586,40 @@ const UserProfile = () => {
                     onSave={(value) => updateField('address', value)}
                   />
                   
+                  {/* SECCIÓN DE TIPO DE INVERSOR COMPACTA */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Tipo de Inversor
                     </label>
-                    <select
-                      value={user.investorType}
-                      onChange={(e) => handleInvestorTypeChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    >
-                      <option value="Explorador">Explorador (Conservador)</option>
-                      <option value="Aventurero">Aventurero (Moderado)</option>
-                      <option value="Héroe">Héroe (Arriesgado)</option>
-                    </select>
+                    
+                    <div className="grid grid-cols-3 gap-2 mb-1">
+                      {['Explorador', 'Aventurero', 'Héroe'].map(type => (
+                        <button
+                          key={type}
+                          className={`px-3 py-2 text-sm rounded-md border ${
+                            user.investorType === type
+                              ? 'bg-[#3533FF]/10 text-[#3533FF] border-[#3533FF]'
+                              : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
+                          }`}
+                          onClick={() => handleInvestorTypeChange(type)}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>Conservador</span>
+                      <span>Moderado</span>
+                      <span>Arriesgado</span>
+                    </div>
                   </div>
                   
                   <div className="flex justify-end gap-2 mt-6">
                     <button 
                       onClick={() => {
                         setEditMode(false);
-                        setTempPhoto(null);
+                        setTempPhoto(avatar1);
                       }}
                       className="px-4 py-2 border border-gray-300 rounded-md"
                     >
@@ -769,7 +780,9 @@ const UserProfile = () => {
                 onClick={() => handleSelectAvatar(avatar1)}
                 className="flex flex-col items-center group"
               >
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[#3533FF] transition-colors">
+                <div className={`w-24 h-24 rounded-full overflow-hidden border-2 ${
+                  tempPhoto === avatar1 ? 'border-[#3533FF]' : 'border-transparent'
+                } transition-colors`}>
                   <img 
                     src={avatar1} 
                     alt="Avatar 1" 
@@ -783,7 +796,9 @@ const UserProfile = () => {
                 onClick={() => handleSelectAvatar(avatar2)}
                 className="flex flex-col items-center group"
               >
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-transparent group-hover:border-[#3533FF] transition-colors">
+                <div className={`w-24 h-24 rounded-full overflow-hidden border-2 ${
+                  tempPhoto === avatar2 ? 'border-[#3533FF]' : 'border-transparent'
+                } transition-colors`}>
                   <img 
                     src={avatar2} 
                     alt="Avatar 2" 

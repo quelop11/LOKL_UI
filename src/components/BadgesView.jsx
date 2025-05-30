@@ -17,7 +17,7 @@ const BadgesView = ({ badges, user }) => {
       <Divider sx={{ mb: 3 }} />
       
       <Typography variant="h6" gutterBottom>
-        Mis Insignias ({unlockedBadges.length}/{badges.length})
+        Mis logros ({unlockedBadges.length}/{badges.length})
       </Typography>
       
       {unlockedBadges.map(badge => (

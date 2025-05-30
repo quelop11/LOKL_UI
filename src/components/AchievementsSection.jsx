@@ -7,7 +7,7 @@ const AchievementsSection = ({ achievementsUnlocked, totalAchievements, userBadg
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-bold text-[#212529]">
-          Mis Insignias ({achievementsUnlocked}/{totalAchievements})
+          Mis logros ({achievementsUnlocked}/{totalAchievements})
         </h2>
         <button 
           onClick={simulateAchievementProgress}
