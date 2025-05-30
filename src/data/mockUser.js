@@ -5,15 +5,15 @@ export const mockUser = {
     lastName: 'Pérez',
     cc: '1234567890',
     phone: '3001234567',
-    email: 'juan.perez@example.com',
+    email: 'juan.perez@lokl.life',
     birthDate: '15/05/1985',
     city: 'Medellín',
     address: 'Av. Nutibara #71-25'
   },
   joinDate: '2020-03-15',
-  investorType: 'Explorador', // Héroe , Explorador , Aventurero
+  investorType: 'Explorador', // Héroe, Explorador, Aventurero
   profileCompletion: 65,
-  photoUrl: "https://randomuser.me/api/portraits/men/42.jpg",
+  photoUrl: "https://randomuser.me/api/portraits/men/10.jpg",
   badges: {
     unlocked: [1, 6, 9], // IDs de badges desbloqueados
     progress: {
@@ -24,7 +24,6 @@ export const mockUser = {
       8: 0
     }
   },
-  // Datos para calcular progreso de badges
   stats: {
     investmentTotal: 1250000,
     referrals: 3,
@@ -34,4 +33,4 @@ export const mockUser = {
     monthlyRank: 0,
     vipReferrals: 0
   }
-};
+}

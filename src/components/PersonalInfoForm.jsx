@@ -1,242 +1,192 @@
 import React from 'react';
+import { Box, TextField, Button, Grid, Typography, Avatar } from '@mui/material';
 import {
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Paper,
-  Divider,
-  Avatar,
-  Stack,
-  Grid
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import EmailIcon from '@mui/icons-material/Email';
-import PhoneIcon from '@mui/icons-material/Phone';
-import CakeIcon from '@mui/icons-material/Cake';
-import HomeIcon from '@mui/icons-material/Home';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import PersonIcon from '@mui/icons-material/Person';
-import LocationCityIcon from '@mui/icons-material/LocationCity';
+  Edit as EditIcon,
+  Email as EmailIcon,
+  Phone as PhoneIcon,
+  Cake as CakeIcon,
+  Home as HomeIcon,
+  Fingerprint as FingerprintIcon,
+  Person as PersonIcon,
+  LocationCity as LocationCityIcon
+} from '@mui/icons-material';
 
-const FormField = ({ label, name, type = 'text', editMode, value, error, onChange, icon }) => {
-  return editMode ? (
-    <TextField
-      fullWidth
-      variant="outlined"
-      label={label}
-      name={name}
-      type={type}
-      value={value || ''}
-      onChange={onChange}
-      error={Boolean(error)}
-      helperText={error || ''}
-      size="small"
-      InputProps={{
-        startAdornment: icon ? (
-          <Box sx={{ color: 'action.active', mr: 1, my: 0.5 }}>
-            {React.cloneElement(icon, { fontSize: 'small' })}
-          </Box>
-        ) : null,
-      }}
-    />
-  ) : (
-    <Box display="flex" alignItems="center" gap={1} sx={{ minHeight: '40px' }}>
-      {icon && React.cloneElement(icon, { color: 'action', fontSize: 'small' })}
-      <Typography
-        variant="body2"
-        color={value ? 'textPrimary' : 'textSecondary'}
-        sx={{ fontStyle: value ? 'normal' : 'italic' }}
-      >
-        <strong>{label}:</strong> {value || 'No especificado'}
-      </Typography>
-    </Box>
-  );
-};
+const PersonalInfoForm = ({ user, onSave }) => {
+  const [formData, setFormData] = React.useState({
+    firstName: user.personalInfo.firstName,
+    lastName: user.personalInfo.lastName,
+    cc: user.personalInfo.cc,
+    phone: user.personalInfo.phone,
+    email: user.personalInfo.email,
+    birthDate: user.personalInfo.birthDate,
+    city: user.personalInfo.city,
+    address: user.personalInfo.address
+  });
 
-const PersonalInfoForm = ({
-  user,
-  editMode,
-  formData,
-  errors,
-  onInputChange,
-  onSave,
-  onEditToggle
-}) => {
-  const getUserInitials = (userData) => {
-    const first = userData?.personalInfo?.firstName || 'U';
-    const last = userData?.personalInfo?.lastName || 'S';
-    return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const formatDateForInput = (dateString) => {
-    if (!dateString) return '';
-    
-    // Si ya está en formato ISO (YYYY-MM-DD), retornar directamente
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
-    
-    // Convertir desde formato dd/mm/aaaa a YYYY-MM-DD
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-      const [day, month, year] = parts;
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-    }
-    
-    return dateString;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({
+      ...user,
+      personalInfo: {
+        ...user.personalInfo,
+        ...formData
+      }
+    });
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6" component="h2" fontWeight="bold" color="primary">
-          Información Personal
-        </Typography>
-        {editMode ? (
-          <Stack direction="row" spacing={1}>
-            <Button variant="outlined" color="secondary" onClick={() => onEditToggle(false)}>
-              Cancelar
-            </Button>
-            <Button variant="contained" color="primary" onClick={onSave}>
-              Guardar Cambios
-            </Button>
-          </Stack>
-        ) : (
-          <Button
-            variant="outlined"
-            onClick={() => onEditToggle(true)}
-            startIcon={<EditIcon fontSize="small" />}
-          >
-            Editar Información
-          </Button>
-        )}
-      </Box>
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+      <Grid container spacing={3} alignItems="center" justifyContent="center">
+        <Grid item xs={12} sx={{ textAlign: 'center' }}>
+          <Avatar
+            src={user.photoUrl}
+            sx={{
+              width: 120,
+              height: 120,
+              margin: '0 auto',
+              border: '3px solid #1976d2'
+            }}
+          />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            {user.personalInfo.firstName} {user.personalInfo.lastName}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {user.investorType}
+          </Typography>
+        </Grid>
 
-      {!editMode && (
-        <Box mb={3} display="flex" alignItems="center" gap={2}>
-          <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main' }}>
-            {getUserInitials(user)}
-          </Avatar>
-          <Box>
-            <Typography variant="h6" fontWeight="bold">
-              {formData.firstName} {formData.lastName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {user.investorType}
-            </Typography>
-          </Box>
-        </Box>
-      )}
-
-      <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <FormField
+          <TextField
+            fullWidth
             label="Nombre"
             name="firstName"
-            editMode={editMode}
             value={formData.firstName}
-            error={errors.firstName}
-            onChange={onInputChange}
-            icon={<PersonIcon />}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <PersonIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <FormField
+          <TextField
+            fullWidth
             label="Apellido"
             name="lastName"
-            editMode={editMode}
             value={formData.lastName}
-            error={errors.lastName}
-            onChange={onInputChange}
-            icon={<PersonIcon />}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <PersonIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
 
-        <Grid item xs={12}>
-          <Divider sx={{ my: 1 }} />
-        </Grid>
-
         <Grid item xs={12} md={6}>
-          <FormField
-            label="Cédula"
+          <TextField
+            fullWidth
+            label="Documento"
             name="cc"
-            editMode={editMode}
             value={formData.cc}
-            error={errors.cc}
-            onChange={onInputChange}
-            icon={<FingerprintIcon />}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <FingerprintIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <FormField
+          <TextField
+            fullWidth
             label="Teléfono"
             name="phone"
-            editMode={editMode}
             value={formData.phone}
-            error={errors.phone}
-            onChange={onInputChange}
-            icon={<PhoneIcon />}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <PhoneIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
-        <Grid item xs={12} md={6}>
-          <FormField
+
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
             label="Correo electrónico"
             name="email"
-            editMode={editMode}
+            type="email"
             value={formData.email}
-            error={errors.email}
-            onChange={onInputChange}
-            icon={<EmailIcon />}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <EmailIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
+
         <Grid item xs={12} md={6}>
-          <FormField
-            label="Fecha de Nacimiento"
+          <TextField
+            fullWidth
+            label="Fecha de nacimiento"
             name="birthDate"
-            type="date"
-            editMode={editMode}
-            value={formatDateForInput(formData.birthDate)}
-            error={errors.birthDate}
-            onChange={onInputChange}
-            icon={<CakeIcon />}
+            placeholder="DD/MM/YYYY"
+            value={formData.birthDate}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <CakeIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
 
-        <Grid item xs={12}>
-          <Divider sx={{ my: 1 }} />
-        </Grid>
-
         <Grid item xs={12} md={6}>
-          <FormField
+          <TextField
+            fullWidth
             label="Ciudad"
             name="city"
-            editMode={editMode}
             value={formData.city}
-            error={errors.city}
-            onChange={onInputChange}
-            icon={<LocationCityIcon />}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <LocationCityIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
+
         <Grid item xs={12}>
-          <FormField
+          <TextField
+            fullWidth
             label="Dirección"
             name="address"
-            editMode={editMode}
             value={formData.address}
-            error={errors.address}
-            onChange={onInputChange}
-            icon={<HomeIcon />}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: <HomeIcon sx={{ color: 'action.active', mr: 1 }} />
+            }}
           />
         </Grid>
-      </Grid>
 
-      {!editMode && (
-        <Box mt={3} pt={2} borderTop="1px dashed #ddd">
-          <Typography variant="body2" color="text.secondary">
-            <strong>Miembro desde:</strong> {new Date(user.joinDate).toLocaleDateString()}
-          </Typography>
-        </Box>
-      )}
-    </Paper>
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => onSave(user)}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            startIcon={<EditIcon />}
+          >
+            Guardar cambios
+          </Button>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 

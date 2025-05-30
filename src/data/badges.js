@@ -51,7 +51,7 @@ export const badges = [
     maxProgress: 4,
     category: "sustainability",
     unlocked: false,
-    recommendation: "Revisa los proyectos"
+    recommendation: "Revisa los proyectos disponibles"
   },
   {
     id: 6,
@@ -93,4 +93,4 @@ export const badges = [
     category: "starter",
     unlocked: true,
   }
-];
+]
