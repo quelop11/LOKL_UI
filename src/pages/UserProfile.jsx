@@ -10,6 +10,18 @@ import { getUserBadges, checkBadgeUnlocks, updateBadgeProgress } from '../servic
 import { formatDate, formatJoinDate } from '../services/format';
 import EditableField from '../components/EditableField';
 
+// Importar iconos de Material UI
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import PeopleIcon from '@mui/icons-material/People';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import LoopIcon from '@mui/icons-material/Loop';
+import NatureIcon from '@mui/icons-material/Nature';
+import NewReleasesIcon from '@mui/icons-material/NewReleases';
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import StarIcon from '@mui/icons-material/Star';
+
 // Importar avatares
 import avatar1 from '../assets/avatars/avatar1.png';
 import avatar2 from '../assets/avatars/avatar2.png';
@@ -237,10 +249,41 @@ const UserProfile = () => {
     },
   };
 
+  // Mapeo de iconos para los logros usando Material UI
+  const badgeIcons = {
+    // Insignias de inversión
+    'Inversor Novato': <MilitaryTechIcon style={{ fontSize: 16 }} />,
+    'Top Inversor': <WorkspacePremiumIcon style={{ fontSize: 16 }} />,
+    'Inversor Recurrente': <LoopIcon style={{ fontSize: 16 }} />,
+    'Multiproyectos': <NatureIcon style={{ fontSize: 16 }} />,
+    'Fundador Temprano': <NewReleasesIcon style={{ fontSize: 16 }} />,
+    
+    // Insignias de referidos
+    'Recomiéndame Más': <PeopleIcon style={{ fontSize: 16 }} />,
+    'Recomendación VIP': <EmojiEventsIcon style={{ fontSize: 16 }} />,
+    
+    // Insignias especiales
+    'Líder del Mes': <EmojiEventsIcon style={{ fontSize: 16 }} />,
+    'Bono de Bienvenida': <CardGiftcardIcon style={{ fontSize: 16 }} />,
+    
+    // Icono por defecto
+    'default': <AttachMoneyIcon style={{ fontSize: 16 }} />
+  };
+
   const currentLevelInfo = levelProgress[user.investorType] || levelProgress.Explorador;
   const profileCompletion = user.profileCompletion || calculateProfileCompletion(user.personalInfo || {});
   const achievementsUnlocked = user.achievements?.completed || 0;
   const totalAchievements = user.achievements?.total || badges.length;
+
+  // Obtener los logros desbloqueados con sus iconos
+  const unlockedBadgesWithIcons = user.badges.unlocked.map(badgeId => {
+    const badge = badges.find(b => b.id === badgeId);
+    return {
+      id: badgeId,
+      title: badge?.title || 'Logro Desbloqueado',
+      icon: badgeIcons[badge?.title] || badgeIcons.default
+    };
+  });
 
   const tabs = [
     {
@@ -362,26 +405,25 @@ const UserProfile = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Achievement Card */}
+          {/* Achievement Card - COMPACT VERSION */}
           <div className="overflow-hidden rounded-xl border-none bg-gradient-to-br from-[#3533FF] to-[#4845ff] text-white shadow-lg">
-            <div className="p-4 pb-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold">{currentLevelInfo.name}</h2>
-                  <p className="text-white/80">{currentLevelInfo.description}</p>
-                </div>
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 p-2 backdrop-blur-sm">
-                  <Trophy className="h-8 w-8 text-white" />
-                </div>
+            <div className="p-3 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold">{currentLevelInfo.name}</h2>
+                <p className="text-xs text-white/80 mt-1">{currentLevelInfo.description}</p>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 p-1">
+                <Trophy className="h-6 w-6 text-white" />
               </div>
             </div>
-            <div className="p-4">
-              <div className="mb-4 mt-2">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-medium text-white/90">Perfil completado</span>
-                  <span className="text-sm font-medium text-white/90">{profileCompletion}%</span>
+            
+            <div className="px-3 pb-3">
+              <div className="mb-2">
+                <div className="mb-1 flex items-center justify-between text-xs">
+                  <span>Perfil completado</span>
+                  <span>{profileCompletion}%</span>
                 </div>
-                <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-white rounded-full" 
                     style={{ width: `${profileCompletion}%` }}
@@ -389,35 +431,50 @@ const UserProfile = () => {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-medium text-white/90">Logros desbloqueados</span>
-                  <span className="text-sm font-medium text-white/90">
+              <div className="mb-3">
+                <div className="mb-1 flex items-center justify-between text-xs">
+                  <span>Logros desbloqueados</span>
+                  <span>
                     {achievementsUnlocked}/{totalAchievements}
                   </span>
                 </div>
-                <div className="flex gap-1">
-                  {Array.from({ length: totalAchievements }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`h-2 flex-1 rounded-full ${i < achievementsUnlocked ? "bg-white" : "bg-white/20"}`}
-                    />
+                
+                {/* Mostrar iconos de logros desbloqueados */}
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {unlockedBadgesWithIcons.map((badge, index) => (
+                    <div 
+                      key={index}
+                      className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center p-1"
+                      title={badge.title}
+                    >
+                      {badge.icon}
+                    </div>
+                  ))}
+                  
+                  {/* Mostrar espacios vacíos para logros no desbloqueados */}
+                  {Array.from({ length: totalAchievements - achievementsUnlocked }).map((_, i) => (
+                    <div 
+                      key={`empty-${i}`}
+                      className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center p-1"
+                    >
+                      <div className="w-2 h-2 bg-white/30 rounded-full"></div>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                <div>
-                  <p className="text-sm font-medium text-white/80">Nivel actual</p>
-                  <p className="text-lg font-bold">{user.stats?.level || 1}</p>
+              <div className="flex items-center justify-between rounded-lg bg-white/10 p-2 text-xs">
+                <div className="text-center">
+                  <p className="font-medium">Nivel actual</p>
+                  <p className="font-bold text-sm">{user.stats?.level || 1}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white/80">Siguiente nivel</p>
-                  <p className="text-lg font-bold">{currentLevelInfo.nextLevel || "Máximo"}</p>
+                <div className="text-center">
+                  <p className="font-medium">Siguiente nivel</p>
+                  <p className="font-bold text-sm">{currentLevelInfo.nextLevel || "Máximo"}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white/80">Logros necesarios</p>
-                  <p className="text-lg font-bold">
+                <div className="text-center">
+                  <p className="font-medium">Logros necesarios</p>
+                  <p className="font-bold text-sm">
                     {achievementsUnlocked}/{currentLevelInfo.requiredAchievements}
                   </p>
                 </div>
@@ -585,35 +642,6 @@ const UserProfile = () => {
                     value={formData.address}
                     onSave={(value) => updateField('address', value)}
                   />
-                  
-                  {/* SECCIÓN DE TIPO DE INVERSOR COMPACTA */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tipo de Inversor
-                    </label>
-                    
-                    <div className="grid grid-cols-3 gap-2 mb-1">
-                      {['Explorador', 'Aventurero', 'Héroe'].map(type => (
-                        <button
-                          key={type}
-                          className={`px-3 py-2 text-sm rounded-md border ${
-                            user.investorType === type
-                              ? 'bg-[#3533FF]/10 text-[#3533FF] border-[#3533FF]'
-                              : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
-                          }`}
-                          onClick={() => handleInvestorTypeChange(type)}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>Conservador</span>
-                      <span>Moderado</span>
-                      <span>Arriesgado</span>
-                    </div>
-                  </div>
                   
                   <div className="flex justify-end gap-2 mt-6">
                     <button 
