@@ -235,7 +235,7 @@ const UserProfile = () => {
     },
     Aventurero: {
       name: "Aventurero",
-      description: "Inversor Moderado",
+      description: "Immune: Multimedia",
       color: "bg-blue-600",
       nextLevel: "Héroe",
       requiredAchievements: 7,
@@ -433,7 +433,7 @@ const UserProfile = () => {
 
               <div className="mb-3">
                 <div className="mb-1 flex items-center justify-between text-xs">
-                  <span>Logros desbloqueados</span>
+                  <span>Lograr detalles positivos</span>
                   <span>
                     {achievementsUnlocked}/{totalAchievements}
                   </span>
@@ -465,15 +465,15 @@ const UserProfile = () => {
 
               <div className="flex items-center justify-between rounded-lg bg-white/10 p-2 text-xs">
                 <div className="text-center">
-                  <p className="font-medium">Nivel actual</p>
+                  <p className="font-medium">Nota actual</p>
                   <p className="font-bold text-sm">{user.stats?.level || 1}</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-medium">Siguiente nivel</p>
+                  <p className="font-medium">Signatura actual</p>
                   <p className="font-bold text-sm">{currentLevelInfo.nextLevel || "Máximo"}</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-medium">Logros necesarios</p>
+                  <p className="font-medium">Lograr datos activos</p>
                   <p className="font-bold text-sm">
                     {achievementsUnlocked}/{currentLevelInfo.requiredAchievements}
                   </p>
@@ -585,63 +585,125 @@ const UserProfile = () => {
                   
                   <div className="border-t border-gray-200 pt-4"></div>
                   
-                  <EditableField 
-                    label="Nombre"
-                    value={formData.firstName}
-                    onSave={(value) => updateField('firstName', value)}
-                  />
+                  {/* SECCIÓN DE TIPO DE INVERSOR COMPACTA */}
+                  <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                    <h3 className="font-medium text-gray-700 mb-2">Tipo de Inversionista  </h3>
+                    <p className="text-xs text-gray-500 mb-3">Dato de prueba</p>
+                    
+                    <div className="grid grid-cols-3 gap-2">
+                      {['Explorador', 'Aventurero', 'Héroe'].map(type => (
+                        <button
+                          key={type}
+                          className={`px-2 py-1.5 text-xs rounded-md border ${
+                            user.investorType === type
+                              ? 'bg-[#3533FF]/10 text-[#3533FF] border-[#3533FF]'
+                              : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
+                          }`}
+                          onClick={() => handleInvestorTypeChange(type)}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">No especificarlo</p>
+                  </div>
                   
-                  <EditableField 
-                    label="Apellido"
-                    value={formData.lastName}
-                    onSave={(value) => updateField('lastName', value)}
-                  />
-                  
-                  <EditableField 
-                    label="Cédula"
-                    value={formData.cc}
-                    onSave={(value) => updateField('cc', value)}
-                    validation={(value) => !value || /^\d{6,12}$/.test(value)}
-                    errorMessage="Cédula inválida (6-12 dígitos)"
-                    placeholder="Solo números"
-                  />
-                  
-                  <EditableField 
-                    label="Fecha de Nacimiento"
-                    value={formData.birthDate}
-                    onSave={(value) => updateField('birthDate', value)}
-                    type="date"
-                  />
-                  
-                  <EditableField 
-                    label="Teléfono"
-                    value={formData.phone}
-                    onSave={(value) => updateField('phone', value)}
-                    validation={(value) => !value || /^\d{10}$/.test(value)}
-                    errorMessage="Teléfono debe tener 10 dígitos"
-                    placeholder="10 dígitos"
-                  />
-                  
-                  <EditableField 
-                    label="Correo Electrónico"
-                    value={formData.email}
-                    onSave={(value) => updateField('email', value)}
-                    type="email"
-                    validation={(value) => !value || /\S+@\S+\.\S+/.test(value)}
-                    errorMessage="Correo electrónico inválido"
-                  />
-                  
-                  <EditableField 
-                    label="Ciudad"
-                    value={formData.city}
-                    onSave={(value) => updateField('city', value)}
-                  />
-                  
-                  <EditableField 
-                    label="Dirección"
-                    value={formData.address}
-                    onSave={(value) => updateField('address', value)}
-                  />
+                  {/* DATOS PERSONALES EXPANDIDOS */}
+                  <div className="space-y-4">
+                    <div className="border-b border-gray-200 pb-2">
+                      <h3 className="font-medium text-gray-700">Nombre</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Nombre</label>
+                        <input
+                          type="text"
+                          value={formData.firstName}
+                          onChange={(e) => updateField('firstName', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Juan"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Apellido</label>
+                        <input
+                          type="text"
+                          value={formData.lastName}
+                          onChange={(e) => updateField('lastName', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Pérez"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Cédula</label>
+                        <input
+                          type="text"
+                          value={formData.cc}
+                          onChange={(e) => updateField('cc', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Solo números"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Fecha de Nacimiento</label>
+                        <input
+                          type="date"
+                          value={formData.birthDate}
+                          onChange={(e) => updateField('birthDate', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Dia de Nacimiento"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Teléfono</label>
+                        <input
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => updateField('phone', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="10 dígitos"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Correo Electrónico</label>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => updateField('email', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="@lokl.life"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Ciudad</label>
+                        <input
+                          type="text"
+                          value={formData.city}
+                          onChange={(e) => updateField('city', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Medellín"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-1">Dirección</label>
+                        <input
+                          type="text"
+                          value={formData.address}
+                          onChange={(e) => updateField('address', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                          placeholder="Av. Nutibara #71-25"
+                        />
+                      </div>
+                    </div>
+                  </div>
                   
                   <div className="flex justify-end gap-2 mt-6">
                     <button 
