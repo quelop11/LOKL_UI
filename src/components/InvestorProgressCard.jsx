@@ -7,7 +7,9 @@ const InvestorProgressCard = ({
   achievementsUnlocked, 
   totalAchievements,
   editMode,
-  unlockedBadges
+  unlockedBadges,
+  user,
+  currentLevelInfo
 }) => {
   return (
     <div className="overflow-hidden rounded-xl border-none bg-gradient-to-br from-[#3533FF] to-[#4845ff] text-white shadow-lg">
@@ -22,6 +24,24 @@ const InvestorProgressCard = ({
       </div>
       
       <div className="px-4 pb-4">
+        {/* Nueva sección de información de nivel */}
+        <div className="flex items-center justify-between rounded-lg bg-white/10 p-3 backdrop-blur-sm mb-4">
+          <div>
+            <p className="text-sm font-medium text-white/80">Nivel actual</p>
+            <p className="text-lg font-bold">{user?.stats?.level || 1}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-white/80">Siguiente nivel</p>
+            <p className="text-lg font-bold">{currentLevelInfo?.nextLevel || "Máximo"}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-white/80">Logros necesarios</p>
+            <p className="text-lg font-bold">
+              {achievementsUnlocked}/{currentLevelInfo?.requiredAchievements || totalAchievements}
+            </p>
+          </div>
+        </div>
+
         {/* Sección de progreso del perfil */}
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm mb-1">
