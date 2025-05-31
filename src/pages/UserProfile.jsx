@@ -36,6 +36,7 @@ import RankingSection from '../components/RankingSection';
 import IdentityVerificationSection from '../components/IdentityVerificationSection';
 import PaymentMethodsSection from '../components/PaymentMethodsSection';
 import BankAccountsSection from '../components/BankAccountsSection';
+import InvestorProgressCard from '../components/InvestorProgressCard'; // Nuevo componente
 
 const UserProfile = () => {
   // Estado inicial con datos vacíos para que el progreso comience en 0
@@ -405,82 +406,16 @@ const UserProfile = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Achievement Card - COMPACT VERSION */}
-          <div className="overflow-hidden rounded-xl border-none bg-gradient-to-br from-[#3533FF] to-[#4845ff] text-white shadow-lg">
-            <div className="p-3 flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold">{currentLevelInfo.name}</h2>
-                <p className="text-xs text-white/80 mt-1">{currentLevelInfo.description}</p>
-              </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 p-1">
-                <Trophy className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            
-            <div className="px-3 pb-3">
-              <div className="mb-2">
-                <div className="mb-1 flex items-center justify-between text-xs">
-                  <span>Perfil completado</span>
-                  <span>{profileCompletion}%</span>
-                </div>
-                <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-white rounded-full" 
-                    style={{ width: `${profileCompletion}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <div className="mb-1 flex items-center justify-between text-xs">
-                  <span>Lograr detalles positivos</span>
-                  <span>
-                    {achievementsUnlocked}/{totalAchievements}
-                  </span>
-                </div>
-                
-                {/* Mostrar iconos de logros desbloqueados */}
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {unlockedBadgesWithIcons.map((badge, index) => (
-                    <div 
-                      key={index}
-                      className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center p-1"
-                      title={badge.title}
-                    >
-                      {badge.icon}
-                    </div>
-                  ))}
-                  
-                  {/* Mostrar espacios vacíos para logros no desbloqueados */}
-                  {Array.from({ length: totalAchievements - achievementsUnlocked }).map((_, i) => (
-                    <div 
-                      key={`empty-${i}`}
-                      className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center p-1"
-                    >
-                      <div className="w-2 h-2 bg-white/30 rounded-full"></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between rounded-lg bg-white/10 p-2 text-xs">
-                <div className="text-center">
-                  <p className="font-medium">Nota actual</p>
-                  <p className="font-bold text-sm">{user.stats?.level || 1}</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-medium">Signatura actual</p>
-                  <p className="font-bold text-sm">{currentLevelInfo.nextLevel || "Máximo"}</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-medium">Lograr datos activos</p>
-                  <p className="font-bold text-sm">
-                    {achievementsUnlocked}/{currentLevelInfo.requiredAchievements}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Usamos el nuevo componente InvestorProgressCard */}
+          <InvestorProgressCard 
+            levelInfo={currentLevelInfo}
+            profileCompletion={profileCompletion}
+            achievementsUnlocked={achievementsUnlocked}
+            totalAchievements={totalAchievements}
+            userStats={user.stats}
+            editMode={editMode}
+            unlockedBadges={unlockedBadgesWithIcons}
+          />
 
           {/* User Info Card */}
           <div className="rounded-xl border-none bg-white shadow-md">
@@ -538,80 +473,41 @@ const UserProfile = () => {
               {editMode ? (
                 <div className="space-y-4">
                   {/* Sección de foto de perfil */}
-                  <div className="flex items-center gap-6 mb-4">
-                    <div className="h-24 w-24 rounded-full border-2 border-[#3533FF] overflow-hidden relative">
-                      {tempPhoto ? (
-                        <img 
-                          src={tempPhoto} 
-                          alt="User" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#3533FF] flex items-center justify-center text-white text-2xl">
-                          {getUserInitials(user)}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="font-medium mb-2">Cambiar foto de perfil</h3>
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={() => fileInputRef.current.click()}
-                          className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
-                        >
-                          <Image className="h-4 w-4" />
-                          <span>Subir una foto</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => setShowAvatarSelector(true)}
-                          className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
-                        >
-                          <UserCircle className="h-4 w-4" />
-                          <span>Seleccionar un avatar</span>
-                        </button>
-                        
-                        <input 
-                          type="file"
-                          accept="image/*"
-                          onChange={handlePhotoUpload}
-                          ref={fileInputRef}
-                          className="hidden"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <div className="flex flex-col gap-2 mb-4">
+  <button
+    onClick={() => fileInputRef.current.click()}
+    className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
+  >
+    <Image className="h-4 w-4" />
+    <span>Subir una foto</span>
+  </button>
+
+  <button
+    onClick={() => setShowAvatarSelector(true)}
+    className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
+  >
+    <UserCircle className="h-4 w-4" />
+    <span>Seleccionar un avatar</span>
+  </button>
+
+  <input 
+    type="file"
+    accept="image/*"
+    onChange={handlePhotoUpload}
+    ref={fileInputRef}
+    className="hidden"
+  />
+</div>
+
                   
                   <div className="border-t border-gray-200 pt-4"></div>
                   
-                  {/* SECCIÓN DE TIPO DE INVERSOR COMPACTA */}
-                  <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                    <h3 className="font-medium text-gray-700 mb-2">Tipo de Inversionista  </h3>
-                    <p className="text-xs text-gray-500 mb-3">Dato de prueba</p>
-                    
-                    <div className="grid grid-cols-3 gap-2">
-                      {['Explorador', 'Aventurero', 'Héroe'].map(type => (
-                        <button
-                          key={type}
-                          className={`px-2 py-1.5 text-xs rounded-md border ${
-                            user.investorType === type
-                              ? 'bg-[#3533FF]/10 text-[#3533FF] border-[#3533FF]'
-                              : 'bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200'
-                          }`}
-                          onClick={() => handleInvestorTypeChange(type)}
-                        >
-                          {type}
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">No especificarlo</p>
-                  </div>
+                  
                   
                   {/* DATOS PERSONALES EXPANDIDOS */}
                   <div className="space-y-4">
                     <div className="border-b border-gray-200 pb-2">
-                      <h3 className="font-medium text-gray-700">Nombre</h3>
+                      <h3 className="font-medium text-gray-700">Datos Personales</h3>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
