@@ -1,14 +1,12 @@
 // src/pages/UserProfile.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Bell, Edit, Home, Medal, PiggyBank, Shield, Trophy, User, Wallet, CreditCard,
-  Calendar, Mail, MapPin, Phone, X, Check, Image, UserCircle
+  Bell, Medal, PiggyBank, Shield, Trophy, Wallet, CreditCard, X, Check
 } from 'lucide-react';
 import { mockUser } from '../data/mockUser';
 import { badges } from '../data/badges';
 import { getUserBadges, checkBadgeUnlocks, updateBadgeProgress } from '../services/badgeService';
 import { formatDate, formatJoinDate } from '../services/format';
-import EditableField from '../components/EditableField';
 
 // Importar iconos de Material UI
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -20,23 +18,23 @@ import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-import StarIcon from '@mui/icons-material/Star';
 
-// Importar avatares
-import avatar1 from '../assets/avatars/avatar1.png';
-import avatar2 from '../assets/avatars/avatar2.png';
-
-// Importar logo
+// Importar logo y avatares
 import logo from '../assets/LOKL_LogoNegro.png';
+import avatar1 from '../assets/avatars/avatar1.png';
 
-// Importar los componentes de secciones
+// Importar los componentes refactorizados
+import UserInfoCard from '../components/UserInfoCard';
+import EditProfileModal from '../components/EditProfileModal';
+import InvestorProgressCard from '../components/InvestorProgressCard';
+
+// Importar los otros componentes de secciones
 import AchievementsSection from '../components/AchievementsSection';
 import PiggyBankSection from '../components/PiggyBankSection';
 import RankingSection from '../components/RankingSection';
 import IdentityVerificationSection from '../components/IdentityVerificationSection';
 import PaymentMethodsSection from '../components/PaymentMethodsSection';
 import BankAccountsSection from '../components/BankAccountsSection';
-import InvestorProgressCard from '../components/InvestorProgressCard'; // Nuevo componente
 
 const UserProfile = () => {
   // Estado inicial con datos vacíos para que el progreso comience en 0
@@ -73,9 +71,8 @@ const UserProfile = () => {
     photoUrl: avatar1
   });
 
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({ ...user.personalInfo });
-  const [errors, setErrors] = useState({});
+  // Estados del modal y UI
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('achievements');
   const [userBadges, setUserBadges] = useState([]);
   const [showUnlockModal, setShowUnlockModal] = useState(false);
@@ -83,10 +80,6 @@ const UserProfile = () => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-  const [tempPhoto, setTempPhoto] = useState(avatar1);
-  
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const loadedBadges = getUserBadges(user);
@@ -152,37 +145,25 @@ const UserProfile = () => {
     updateUserStats(randomAction);
   };
 
-  // Función para actualizar un campo específico
-  const updateField = (field, value) => {
-    const newFormData = { ...formData, [field]: value };
-    setFormData(newFormData);
-    
-    // Calcular nuevo progreso inmediatamente
-    const newCompletion = calculateProfileCompletion(newFormData);
-    
-    // Actualizar el progreso visual sin necesidad de guardar
-    setUser(prev => ({
-      ...prev,
-      profileCompletion: newCompletion
-    }));
-  };
-
-  const handleSave = () => {
+  // Función para manejar el guardado del perfil desde el modal
+  const handleSaveProfile = (formData, tempPhoto) => {
     const formDataToSave = { ...formData };
     
+    // Procesar fecha si es necesario
     if (formDataToSave.birthDate && /^\d{4}-\d{2}-\d{2}$/.test(formDataToSave.birthDate)) {
       const [year, month, day] = formDataToSave.birthDate.split('-');
       formDataToSave.birthDate = `${day}/${month}/${year}`;
     }
 
+    // Validar formulario
     const newErrors = validateForm(formDataToSave);
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
       showError('Por favor corrige los errores en el formulario');
       return;
     }
 
+    // Actualizar usuario
     setUser(prev => ({
       ...prev,
       personalInfo: formDataToSave,
@@ -190,8 +171,6 @@ const UserProfile = () => {
       profileCompletion: calculateProfileCompletion(formDataToSave)
     }));
     
-    setEditMode(false);
-    setTempPhoto(avatar1);
     showSuccess('Perfil actualizado correctamente!');
   };
 
@@ -206,24 +185,6 @@ const UserProfile = () => {
     const first = user.personalInfo?.firstName || '';
     const last = user.personalInfo?.lastName || '';
     return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
-  };
-
-  // Función para manejar subida de foto
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTempPhoto(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Función para seleccionar avatar
-  const handleSelectAvatar = (avatar) => {
-    setTempPhoto(avatar);
-    setShowAvatarSelector(false);
   };
 
   const levelProgress = {
@@ -252,22 +213,15 @@ const UserProfile = () => {
 
   // Mapeo de iconos para los logros usando Material UI
   const badgeIcons = {
-    // Insignias de inversión
     'Inversor Novato': <MilitaryTechIcon style={{ fontSize: 16 }} />,
     'Top Inversor': <WorkspacePremiumIcon style={{ fontSize: 16 }} />,
     'Inversor Recurrente': <LoopIcon style={{ fontSize: 16 }} />,
     'Multiproyectos': <NatureIcon style={{ fontSize: 16 }} />,
     'Fundador Temprano': <NewReleasesIcon style={{ fontSize: 16 }} />,
-    
-    // Insignias de referidos
     'Recomiéndame Más': <PeopleIcon style={{ fontSize: 16 }} />,
     'Recomendación VIP': <EmojiEventsIcon style={{ fontSize: 16 }} />,
-    
-    // Insignias especiales
     'Líder del Mes': <EmojiEventsIcon style={{ fontSize: 16 }} />,
     'Bono de Bienvenida': <CardGiftcardIcon style={{ fontSize: 16 }} />,
-    
-    // Icono por defecto
     'default': <AttachMoneyIcon style={{ fontSize: 16 }} />
   };
 
@@ -406,289 +360,22 @@ const UserProfile = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Usamos el nuevo componente InvestorProgressCard */}
+          {/* Componente InvestorProgressCard refactorizado */}
           <InvestorProgressCard 
             levelInfo={currentLevelInfo}
             profileCompletion={profileCompletion}
             achievementsUnlocked={achievementsUnlocked}
             totalAchievements={totalAchievements}
             userStats={user.stats}
-            editMode={editMode}
             unlockedBadges={unlockedBadgesWithIcons}
           />
 
-          {/* User Info Card */}
-          <div className="rounded-xl border-none bg-white shadow-md">
-            <div className="p-4 flex flex-row items-center justify-between border-b">
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full border-2 border-[#3533FF] overflow-hidden relative">
-                  {editMode ? (
-                    <div className="cursor-pointer relative w-full h-full">
-                      {tempPhoto ? (
-                        <img 
-                          src={tempPhoto} 
-                          alt="User" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#3533FF] flex items-center justify-center text-white text-lg">
-                          {getUserInitials(user)}
-                        </div>
-                      )}
-                    </div>
-                  ) : user.photoUrl ? (
-                    <img src={user.photoUrl} alt="User" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-[#3533FF] flex items-center justify-center text-white text-lg">
-                      {getUserInitials(user)}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-[#212529]">
-                    {user.personalInfo?.firstName} {user.personalInfo?.lastName}
-                  </h2>
-                  <div className="flex items-center gap-1 text-sm text-gray-500">
-                    <Home className="h-3 w-3" />
-                    <span>Miembro desde: {formatJoinDate(user.joinDate)}</span>
-                  </div>
-                  <span className="mt-1 inline-block px-2 py-1 bg-[#3533FF]/10 text-[#3533FF] text-sm rounded-md border border-[#3533FF]/30">
-                    {user.investorType}
-                  </span>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  if (editMode) {
-                    setTempPhoto(avatar1);
-                  }
-                  setEditMode(!editMode);
-                }}
-                className="flex items-center gap-1 px-3 py-1 text-sm text-[#3533FF] border border-[#3533FF] rounded-md"
-              >
-                <Edit className="h-3 w-3" /> {editMode ? 'Cancelar' : 'Editar'}
-              </button>
-            </div>
-            <div className="p-4">
-              {editMode ? (
-                <div className="space-y-4">
-                  {/* Sección de foto de perfil */}
-                  <div className="flex flex-col gap-2 mb-4">
-  <button
-    onClick={() => fileInputRef.current.click()}
-    className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
-  >
-    <Image className="h-4 w-4" />
-    <span>Subir una foto</span>
-  </button>
-
-  <button
-    onClick={() => setShowAvatarSelector(true)}
-    className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md"
-  >
-    <UserCircle className="h-4 w-4" />
-    <span>Seleccionar un avatar</span>
-  </button>
-
-  <input 
-    type="file"
-    accept="image/*"
-    onChange={handlePhotoUpload}
-    ref={fileInputRef}
-    className="hidden"
-  />
-</div>
-
-                  
-                  <div className="border-t border-gray-200 pt-4"></div>
-                  
-                  
-                  
-                  {/* DATOS PERSONALES EXPANDIDOS */}
-                  <div className="space-y-4">
-                    <div className="border-b border-gray-200 pb-2">
-                      <h3 className="font-medium text-gray-700">Datos Personales</h3>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Nombre</label>
-                        <input
-                          type="text"
-                          value={formData.firstName}
-                          onChange={(e) => updateField('firstName', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Juan"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Apellido</label>
-                        <input
-                          type="text"
-                          value={formData.lastName}
-                          onChange={(e) => updateField('lastName', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Pérez"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Cédula</label>
-                        <input
-                          type="text"
-                          value={formData.cc}
-                          onChange={(e) => updateField('cc', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Solo números"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Fecha de Nacimiento</label>
-                        <input
-                          type="date"
-                          value={formData.birthDate}
-                          onChange={(e) => updateField('birthDate', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Dia de Nacimiento"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Teléfono</label>
-                        <input
-                          type="tel"
-                          value={formData.phone}
-                          onChange={(e) => updateField('phone', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="10 dígitos"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Correo Electrónico</label>
-                        <input
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => updateField('email', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="@lokl.life"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Ciudad</label>
-                        <input
-                          type="text"
-                          value={formData.city}
-                          onChange={(e) => updateField('city', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Medellín"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-1">Dirección</label>
-                        <input
-                          type="text"
-                          value={formData.address}
-                          onChange={(e) => updateField('address', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                          placeholder="Av. Nutibara #71-25"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end gap-2 mt-6">
-                    <button 
-                      onClick={() => {
-                        setEditMode(false);
-                        setTempPhoto(avatar1);
-                      }}
-                      className="px-4 py-2 border border-gray-300 rounded-md"
-                    >
-                      Cancelar
-                    </button>
-                    <button 
-                      onClick={handleSave}
-                      className="px-4 py-2 bg-[#3533FF] text-white rounded-md"
-                    >
-                      Guardar Cambios
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div>
-                    <h3 className="mb-2 font-medium text-[#212529]">Datos Personales</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full border border-[#3533FF] flex items-center justify-center">
-                          <User className="h-4 w-4 text-[#3533FF]" />
-                        </div>
-                        <span className="text-gray-500">Cédula</span>
-                        <span className="font-medium">{user.personalInfo?.cc || 'No especificado'}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full border border-[#3533FF] flex items-center justify-center">
-                          <Calendar className="h-4 w-4 text-[#3533FF]" />
-                        </div>
-                        <span className="text-gray-500">Fecha de Nacimiento</span>
-                        <span className="font-medium">{formatDate(user.personalInfo?.birthDate) || 'No especificado'}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full border border-[#3533FF] flex items-center justify-center">
-                          <Phone className="h-4 w-4 text-[#3533FF]" />
-                        </div>
-                        <span className="text-gray-500">Teléfono</span>
-                        <span className="font-medium">{user.personalInfo?.phone || 'No especificado'}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full border border-[#3533FF] flex items-center justify-center">
-                          <Mail className="h-4 w-4 text-[#3533FF]" />
-                        </div>
-                        <span className="text-gray-500">Correo Electrónico</span>
-                        <span className="font-medium">{user.personalInfo?.email || 'No especificado'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="mb-2 font-medium text-[#212529]">Dirección</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full border border-[#3533FF] flex items-center justify-center">
-                          <MapPin className="h-4 w-4 text-[#3533FF]" />
-                        </div>
-                        <span className="text-gray-500">Ciudad</span>
-                        <span className="font-medium">{user.personalInfo?.city || 'No especificado'}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full border border-[#3533FF] flex items-center justify-center">
-                          <Home className="h-4 w-4 text-[#3533FF]" />
-                        </div>
-                        <span className="text-gray-500">Dirección</span>
-                        <span className="font-medium">{user.personalInfo?.address || 'No especificado'}</span>
-                      </div>
-                    </div>
-
-                    <h3 className="mb-2 mt-4 font-medium text-[#212529]">Preferencias</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full border border-[#3533FF] flex items-center justify-center">
-                          <User className="h-4 w-4 text-[#3533FF]" />
-                        </div>
-                        <span className="text-gray-500">Tipo de Inversor</span>
-                        <span className="font-medium">{user.investorType}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          {/* Componente UserInfoCard refactorizado */}
+          <UserInfoCard 
+            user={user}
+            onEditClick={() => setIsEditModalOpen(true)}
+            getUserInitials={getUserInitials}
+          />
         </div>
 
         {/* Tabs Section */}
@@ -701,7 +388,7 @@ const UserProfile = () => {
                   {tabs.map(tab => (
                     <button
                       key={tab.id}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left ${
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition-colors ${
                         activeTab === tab.id 
                           ? 'bg-[#3533FF]/10 text-[#3533FF]' 
                           : 'hover:bg-gray-100'
@@ -724,6 +411,15 @@ const UserProfile = () => {
         </div>
       </main>
 
+      {/* Modal de edición de perfil */}
+      <EditProfileModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={user}
+        onSave={handleSaveProfile}
+        calculateProfileCompletion={calculateProfileCompletion}
+      />
+
       {/* Achievement Unlocked Modal */}
       {showUnlockModal && newlyUnlockedBadge && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -742,56 +438,9 @@ const UserProfile = () => {
               )}
               <button
                 onClick={() => setShowUnlockModal(false)}
-                className="px-6 py-2 bg-[#3533FF] text-white rounded-lg hover:bg-[#2a28e0]"
+                className="px-6 py-2 bg-[#3533FF] text-white rounded-lg hover:bg-[#2a28e0] transition-colors"
               >
                 ¡Genial!
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Avatar Selector Modal */}
-      {showAvatarSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">Seleccionar Avatar</h3>
-              <button onClick={() => setShowAvatarSelector(false)}>
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 py-4">
-              <button
-                onClick={() => handleSelectAvatar(avatar1)}
-                className="flex flex-col items-center group"
-              >
-                <div className={`w-24 h-24 rounded-full overflow-hidden border-2 ${
-                  tempPhoto === avatar1 ? 'border-[#3533FF]' : 'border-transparent'
-                } transition-colors`}>
-                  <img 
-                    src={avatar1} 
-                    alt="Avatar 1" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="mt-2 text-sm font-medium group-hover:text-[#3533FF]">Avatar 1</span>
-              </button>
-              
-              <button
-                onClick={() => handleSelectAvatar(avatar2)}
-                className="flex flex-col items-center group"
-              >
-                <div className={`w-24 h-24 rounded-full overflow-hidden border-2 ${
-                  tempPhoto === avatar2 ? 'border-[#3533FF]' : 'border-transparent'
-                } transition-colors`}>
-                  <img 
-                    src={avatar2} 
-                    alt="Avatar 2" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="mt-2 text-sm font-medium group-hover:text-[#3533FF]">Avatar 2</span>
               </button>
             </div>
           </div>

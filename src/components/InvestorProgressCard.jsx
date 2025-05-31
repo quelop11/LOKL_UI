@@ -6,9 +6,8 @@ const InvestorProgressCard = ({
   profileCompletion, 
   achievementsUnlocked, 
   totalAchievements,
-  editMode,
+  userStats,
   unlockedBadges,
-  user,
   currentLevelInfo
 }) => {
   return (
@@ -24,24 +23,6 @@ const InvestorProgressCard = ({
       </div>
       
       <div className="px-4 pb-4">
-        {/* Nueva sección de información de nivel */}
-        <div className="flex items-center justify-between rounded-lg bg-white/10 p-3 backdrop-blur-sm mb-4">
-          <div>
-            <p className="text-sm font-medium text-white/80">Nivel actual</p>
-            <p className="text-lg font-bold">{user?.stats?.level || 1}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-white/80">Siguiente nivel</p>
-            <p className="text-lg font-bold">{currentLevelInfo?.nextLevel || "Máximo"}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-white/80">Logros necesarios</p>
-            <p className="text-lg font-bold">
-              {achievementsUnlocked}/{currentLevelInfo?.requiredAchievements || totalAchievements}
-            </p>
-          </div>
-        </div>
-
         {/* Sección de progreso del perfil */}
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm mb-1">
@@ -50,79 +31,73 @@ const InvestorProgressCard = ({
           </div>
           <div className="h-2 w-full bg-white/20 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-white rounded-full" 
+              className="h-full bg-white rounded-full transition-all duration-500 ease-out" 
               style={{ width: `${profileCompletion}%` }}
             />
           </div>
         </div>
 
-        {/* Sección de logros desbloqueados (solo visible cuando NO está en modo edición) */}
-        {!editMode && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-sm mb-1">
-              <span>Logros desbloqueados</span>
-              <span className="font-medium">
-                {achievementsUnlocked}/{totalAchievements}
-              </span>
-            </div>
-            
-            {/* Iconos de logros - versión compacta */}
-            <div className="flex flex-wrap gap-2 mt-2">
-              {unlockedBadges.map((badge, index) => (
-                <div 
-                  key={index}
-                  className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center p-1"
-                  title={badge.title}
-                >
-                  {badge.icon}
-                </div>
-              ))}
-              
-              {Array.from({ length: totalAchievements - achievementsUnlocked }).map((_, i) => (
-                <div 
-                  key={`empty-${i}`}
-                  className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center p-1"
-                >
-                  <div className="w-2 h-2 bg-white/30 rounded-full"></div>
-                </div>
-              ))}
-            </div>
+        {/* Sección de logros desbloqueados */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span>Logros desbloqueados</span>
+            <span className="font-medium">
+              {achievementsUnlocked}/{totalAchievements}
+            </span>
           </div>
-        )}
-
-        {/* SECCIÓN DE LOGROS DURANTE EDICIÓN (solo visible en modo edición) */}
-        {editMode && (
-          <div className="p-3 rounded-lg mb-4">
-            <h4 className="text-sm font-medium mb-3">Tus Logros</h4>
-            
-            <div className="grid grid-cols-3 gap-3">
-              {unlockedBadges.length > 0 ? (
-                unlockedBadges.map((badge, index) => (
-                  <div 
-                    key={index}
-                    className="bg-white/20 border border-white/30 rounded-lg p-3 flex flex-col items-center justify-center gap-1 transition-all duration-300 hover:scale-[1.02]"
-                    title={badge.title}
-                  >
-                    <div className="text-white text-2xl">
-                      {React.cloneElement(badge.icon, { style: { fontSize: 24 } })}
-                    </div>
-                    <span className="text-xs font-medium text-white text-center">{badge.title}</span>
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-3 text-center py-4 text-sm text-white/80">
-                  Aún no has desbloqueado logros
+          
+          {/* Grid de logros */}
+          <div className="grid grid-cols-6 gap-2">
+            {/* Logros desbloqueados */}
+            {unlockedBadges.slice(0, 6).map((badge, index) => (
+              <div 
+                key={index}
+                className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center p-1 border border-white/30"
+                title={badge.title}
+              >
+                <div className="text-white text-sm">
+                  {React.cloneElement(badge.icon, { style: { fontSize: 16 } })}
                 </div>
-              )}
-            </div>
-            
-            {achievementsUnlocked < totalAchievements && (
-              <div className="text-xs text-white/80 mt-3 text-center">
-                Completa más acciones para desbloquear {totalAchievements - achievementsUnlocked} logros adicionales
               </div>
-            )}
+            ))}
+            
+            {/* Espacios vacíos para logros no desbloqueados */}
+            {Array.from({ length: Math.max(0, 6 - unlockedBadges.length) }).map((_, i) => (
+              <div 
+                key={`empty-${i}`}
+                className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center border border-white/20"
+              >
+                <div className="w-2 h-2 bg-white/30 rounded-full"></div>
+              </div>
+            ))}
           </div>
-        )}
+          
+          {/* Mostrar más logros si hay más de 6 */}
+          {unlockedBadges.length > 6 && (
+            <div className="text-xs text-white/80 mt-2 text-center">
+              +{unlockedBadges.length - 6} logros adicionales
+            </div>
+          )}
+          
+          {/* Mensaje motivacional */}
+          {achievementsUnlocked === 0 && (
+            <div className="text-xs text-white/80 mt-2 text-center">
+              ¡Comienza a invertir para desbloquear logros!
+            </div>
+          )}
+        </div>
+
+        {/* Estadísticas adicionales */}
+        <div className="flex justify-center gap-12 rounded-lg bg-white/10 p-3 backdrop-blur-sm">
+  <div className="text-center">
+    <p className="text-sm font-medium text-white/80">Nivel actual</p>
+    <p className="text-lg font-bold">{userStats?.level || 1}</p>
+  </div>
+  <div className="text-center">
+    <p className="text-sm font-medium text-white/80">Siguiente nivel</p>
+    <p className="text-lg font-bold">{currentLevelInfo?.nextLevel || "Máximo"}</p>
+  </div>
+</div>
       </div>
     </div>
   );
